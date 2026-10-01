@@ -1,0 +1,58 @@
+name: TS Autofix end-to-end tests
+
+on:
+  schedule:
+    # Mondays 07:17 UTC (08:17 in Lagos)
+    - cron: '17 7 * * 1'
+  workflow_dispatch:
+    inputs:
+      suite:
+        description: 'TestNG suite to run'
+        required: true
+        default: 'execute-all-tests'
+        type: choice
+        options:
+          - execute-all-tests
+          - no-alert-tests
+          - escalation-tests
+
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    timeout-minutes: 30
+    env:
+      MANAGER_PASSCODE: ${{ secrets.MANAGER_PASSCODE }}
+      FEEDBACK_FORM_URL: ${{ secrets.FEEDBACK_FORM_URL }}
+      SUITE: ${{ inputs.suite || 'execute-all-tests' }}
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: 'maven'
+
+      - name: Install Chromium for Playwright
+        run: mvn -B -q exec:java -e -Dexec.mainClass=com.microsoft.playwright.CLI -Dexec.args="install --with-deps chromium"
+
+      - name: Run suite
+        run: mvn -B test -DsuiteXmlFile=test-runner/${SUITE}.xml
+
+      - name: Upload test reports
+        if: always()
+        uses: actions/upload-artifact@v4
+        with:
+          name: surefire-reports-${{ env.SUITE }}
+          path: target/surefire-reports/
+          retention-days: 30
+
+      - name: Upload Playwright traces of failed tests
+        if: failure()
+        uses: actions/upload-artifact@v4
+        with:
+          name: playwright-traces-${{ env.SUITE }}
+          path: target/traces/
+          retention-days: 30
