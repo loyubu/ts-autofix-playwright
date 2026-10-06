@@ -2,10 +2,12 @@ package pageobjects;
 
 import com.microsoft.playwright.Locator;
 import com.microsoft.playwright.Page;
+import com.microsoft.playwright.options.AriaRole;
 
 import java.time.Duration;
 import java.time.Instant;
 import java.util.Optional;
+import java.util.regex.Pattern;
 
 /**
  * /manager after sign-in: the four queues, each a table with one row per open item.
@@ -45,6 +47,7 @@ public class ManagerDashboardPage extends BasePage {
         Instant deadline = Instant.now().plus(timeout);
         while (true) {
             signOutLink().waitFor();
+            showAllRows();
             for (Queue queue : Queue.values()) {
                 if (row(queue, visitId).count() > 0) {
                     return Optional.of(queue);
@@ -56,6 +59,16 @@ public class ManagerDashboardPage extends BasePage {
             page.waitForTimeout(POLL_INTERVAL.toMillis());
             page.reload();
         }
+    }
+
+    /** Queues show their latest 5 rows until "Show all N" is pressed; press it in every queue. */
+    public ManagerDashboardPage showAllRows() {
+        Locator showAll = page.getByRole(AriaRole.BUTTON,
+                new Page.GetByRoleOptions().setName(Pattern.compile("^Show all \\d+$")));
+        while (showAll.count() > 0) {
+            showAll.first().click();
+        }
+        return this;
     }
 
     public String getReason(Queue queue, String visitId) {
