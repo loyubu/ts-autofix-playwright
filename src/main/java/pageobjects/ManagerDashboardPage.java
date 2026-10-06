@@ -47,9 +47,8 @@ public class ManagerDashboardPage extends BasePage {
         Instant deadline = Instant.now().plus(timeout);
         while (true) {
             signOutLink().waitFor();
-            showAllRows();
             for (Queue queue : Queue.values()) {
-                if (row(queue, visitId).count() > 0) {
+                if (reveal(queue, visitId)) {
                     return Optional.of(queue);
                 }
             }
@@ -61,26 +60,50 @@ public class ManagerDashboardPage extends BasePage {
         }
     }
 
-    /** Queues show their latest 5 rows until "Show all N" is pressed; press it in every queue. */
-    public ManagerDashboardPage showAllRows() {
-        Locator showAll = page.getByRole(AriaRole.BUTTON,
-                new Page.GetByRoleOptions().setName(Pattern.compile("^Show all \\d+$")));
-        while (showAll.count() > 0) {
-            showAll.first().click();
+    /**
+     * Brings a visit's row onto the screen. A queue lists its latest 5 rows until "Show all N" is
+     * pressed, then 10 rows a page. Acting on a row can move it to another page, so call this before
+     * reading or clicking a row. Returns false if the visit is not in this queue.
+     */
+    public boolean reveal(Queue queue, String visitId) {
+        Locator section = queue(queue);
+        Locator showAll = section.getByRole(AriaRole.BUTTON,
+                new Locator.GetByRoleOptions().setName(Pattern.compile("^Show all \\d+$")));
+        if (showAll.count() > 0) {
+            showAll.click();
         }
-        return this;
+        Locator previous = pageButton(section, "Previous page");
+        while (previous.count() > 0 && previous.isEnabled()) {
+            previous.click();
+        }
+        Locator next = pageButton(section, "Next page");
+        while (row(queue, visitId).count() == 0) {
+            if (next.count() == 0 || !next.isEnabled()) {
+                return false;
+            }
+            next.click();
+        }
+        return true;
+    }
+
+    private static Locator pageButton(Locator section, String name) {
+        return section.getByRole(AriaRole.BUTTON,
+                new Locator.GetByRoleOptions().setName(name).setExact(true));
     }
 
     public String getReason(Queue queue, String visitId) {
+        reveal(queue, visitId);
         return row(queue, visitId).locator("td").nth(REASON_COLUMN).innerText().trim();
     }
 
     public int getSeverity(Queue queue, String visitId) {
+        reveal(queue, visitId);
         return Integer.parseInt(row(queue, visitId).locator("td").nth(SEVERITY_COLUMN).innerText().trim());
     }
 
     /** Opens a row to show what the customer wrote, the drafted reply and the action buttons. */
     public ManagerDashboardPage openVisit(Queue queue, String visitId) {
+        reveal(queue, visitId);
         row(queue, visitId).click();
         return this;
     }
@@ -106,6 +129,7 @@ public class ManagerDashboardPage extends BasePage {
 
     /** The "Open" / "Acted on" badge an escalated row carries. */
     public Locator alertBadge(String visitId) {
+        reveal(Queue.ESCALATED, visitId);
         return row(Queue.ESCALATED, visitId).locator("td").first().locator("span").last();
     }
 }
