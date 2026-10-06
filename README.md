@@ -66,7 +66,7 @@ suite skips the two escalation tests.
 
 | Workflow | When | Suite |
 |---|---|---|
-| `weekly-tests.yml` | Mondays at 08:17 Lagos time | `execute-all-tests` |
+| `weekly-tests.yml` | Mondays at 08:17 Lagos time (**paused** during the move to self-hosted n8n) | `execute-all-tests` |
 | `weekly-tests.yml` | On demand (Actions → Run workflow) | your choice of suite |
 
 A full run takes about 2–3 minutes, most of it spent waiting for n8n to score each reply. Reports are

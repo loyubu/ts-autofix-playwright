@@ -1,9 +1,11 @@
 name: TS Autofix end-to-end tests
 
 on:
-  schedule:
-    # Mondays 07:17 UTC (08:17 in Lagos)
-    - cron: '17 7 * * 1'
+  # Paused while n8n moves from n8n Cloud to self-hosted on Oracle Cloud. Uncomment once the
+  # site, 00 Config and the FEEDBACK_FORM_URL secret point at the new instance.
+  # schedule:
+  #   # Mondays 07:17 UTC (08:17 in Lagos)
+  #   - cron: '17 7 * * 1'
   workflow_dispatch:
     inputs:
       suite:
