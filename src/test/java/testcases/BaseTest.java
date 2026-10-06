@@ -104,6 +104,7 @@ public class BaseTest {
                 .open(Constants.feedbackFormUrl(), visitId)
                 .enterFeedback(reply)
                 .submit();
+        assertThat(form.confirmationHeader()).isVisible();
         assertThat(form.confirmationHeader()).hasText(Constants.FORM_SUBMITTED_TEXT);
         System.out.println("Replied for " + visitId + ": \"" + reply + "\"");
     }

@@ -32,7 +32,11 @@ public class FeedbackFormPage extends BasePage {
         return this;
     }
 
-    /** "Form Submitted" once n8n has accepted the reply. */
+    /**
+     * "Form Submitted" once n8n has accepted the reply. The header is in the page, hidden, before
+     * the form is sent, so check it is visible as well as its text: the form only shows it once n8n
+     * has answered, and leaving the page before then cancels the submission.
+     */
     public Locator confirmationHeader() {
         return page.locator("#submitted-header");
     }
