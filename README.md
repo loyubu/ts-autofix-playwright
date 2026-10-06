@@ -70,7 +70,9 @@ suite skips the two escalation tests.
 | `weekly-tests.yml` | On demand (Actions → Run workflow) | your choice of suite |
 
 A full run takes about 2–3 minutes, most of it spent waiting for n8n to score each reply. Reports are
-uploaded as an artifact on every run. When a test fails, a Playwright trace is uploaded as well.
+uploaded as an artifact on every run. Traces are **not** uploaded from CI: a trace records every
+value typed into the page, the manager passcode included, and this repository is public. To get a
+trace for a failing test, run it locally (see below).
 
 ## Design
 
