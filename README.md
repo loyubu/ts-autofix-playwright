@@ -142,9 +142,18 @@ They are never committed, because this repository is public.
 | `BASE_URL` | `base.url` | no | `https://transsahara.com` |
 | `ROUTING_TIMEOUT_SECONDS` | `routing.timeout.seconds` | no | `180` |
 | `HEADLESS` | `headless` | no | `true` |
+| `EVAL_SCORE_URL` | — | only for `eval/` | — |
 
 For CI, add `MANAGER_PASSCODE` and `FEEDBACK_FORM_URL` as repository secrets (Settings → Secrets
 and variables → Actions). `.env.example` lists the same settings for local use.
+
+## Scorer evaluation
+
+The suite checks one random reply per route per run, which a scorer that is only usually right
+can pass by luck. [`eval/`](eval/README.md) measures the AI scorer itself: all 100 labelled
+replies, three times each, through **"02-eval Score only"**, an n8n copy of 02's scoring step and
+routing rules that writes nothing and sends no alerts. It reports accuracy per route, a confusion
+table, consistency between runs and the severity scores near the escalation cut-off.
 
 ## Roadmap
 
