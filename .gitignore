@@ -6,3 +6,4 @@ target/
 .env.*
 !.env.example
 target-run.log
+__pycache__/
