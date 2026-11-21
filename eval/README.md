@@ -11,7 +11,10 @@ properly, against all 100 labelled replies in
 |---|---|
 | `02-eval-score-only.json` | The **"02-eval Score only"** n8n workflow, ready to import |
 | `score_eval.py` | Sends every reply through that workflow and writes the report |
+| `hard_cases.json`, `hard_cases.py` | Layer 3: 30 hard replies (sarcasm, Pidgin/Yoruba, injection, personal data, threats, calm safety problems), each with the routes that are acceptable |
+| `failure_modes.mjs` | Layer 3: runs the routing code against simulated AI failures (`node eval/failure_modes.mjs`) |
 | `results/` | One CSV (every call) and one Markdown summary per run |
+| [`FINDINGS.md`](FINDINGS.md) | **What the evaluation found**, most serious first |
 
 ## The "02-eval Score only" workflow
 
@@ -69,6 +72,8 @@ Needs Python 3.9+ and nothing else.
 ```bash
 python eval/score_eval.py --limit 2   # smoke test: 2 replies per pool, one run (10 calls)
 python eval/score_eval.py             # full: 100 replies x 3 runs + 20 history checks = 320 calls
+python eval/hard_cases.py             # Layer 3: 30 hard cases x 3 runs = 90 calls
+node eval/failure_modes.mjs           # Layer 3: routing under simulated AI failures, no calls
 ```
 
 A full run takes about 10 minutes and costs a few cents of OpenAI credit.
