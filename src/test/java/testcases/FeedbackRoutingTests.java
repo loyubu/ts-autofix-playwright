@@ -33,8 +33,14 @@ public class FeedbackRoutingTests extends BaseTest {
         assertRoutedTo(dashboard, visitId, Queue.READY_TO_POST);
         Assert.assertEquals(dashboard.getReason(Queue.READY_TO_POST, visitId), "Positive");
 
+        // The form's permission box is left unticked, so this review may never be published:
+        // the page says so, offers no Publish button, and the test closes it without publishing.
+        // The weekly run therefore never puts anything on the public reviews page.
+        dashboard.openVisit(Queue.READY_TO_POST, visitId);
+        assertThat(dashboard.publishingPermission()).containsText("No");
+        assertThat(dashboard.actionButton("Publish on website")).hasCount(0);
+        dashboard.clickAction("Close without publishing");
         // Acting moves the row out of the queue, so the check is that it has gone.
-        dashboard.openVisit(Queue.READY_TO_POST, visitId).clickAction("Mark posted");
         assertThat(dashboard.row(Queue.READY_TO_POST, visitId)).hasCount(0);
     }
 

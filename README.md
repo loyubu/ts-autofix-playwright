@@ -31,7 +31,7 @@ full journey:
 
 | Test | Customer's reply | Expected queue | Manager action |
 |---|---|---|---|
-| `positiveFeedbackIsReadyToPost` | Pleased with the work | **Ready to post**, "Positive" | Mark posted |
+| `positiveFeedbackIsReadyToPost` | Pleased with the work (permission box unticked) | **Ready to post**, "Positive", "Customer allowed publishing: No" | Close without publishing |
 | `firstComplaintGoesToPrivateDrafts` | A minor complaint, first time | **Private drafts**, severity below 4, with a drafted reply | Mark sent (own email) |
 | `repeatComplaintIsEscalated` | Two visits by the same customer: a first complaint, then a deliberately mild one | **Escalated**, "Repeat complaint" | Mark alert acted on |
 | `unreadableReplyNeedsReview` | Gibberish, after a long complaint at check-in | **Needs review**, "Please read it." | Mark resolved |

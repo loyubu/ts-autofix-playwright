@@ -113,16 +113,27 @@ public class ManagerDashboardPage extends BasePage {
         return page.locator("textarea[id^='draft-']");
     }
 
+    /** The open Ready-to-post row's line "Customer allowed publishing: Yes/No". */
+    public Locator publishingPermission() {
+        return page.getByText("Customer allowed publishing:");
+    }
+
+    /** One of the open row's buttons by its exact name, for checking it is or is not offered. */
+    public Locator actionButton(String buttonName) {
+        return button(buttonName);
+    }
+
     /**
-     * Presses one of the open row's buttons, for example "Mark posted". This suite never presses
-     * "Send reply", so it never emails a customer.
+     * Presses one of the open row's buttons, for example "Close without publishing". This suite
+     * never presses "Send reply" or "Publish on website", so it never emails a customer and never
+     * puts anything on the public reviews page.
      */
     public ManagerDashboardPage clickAction(String buttonName) {
         button(buttonName).click();
         return this;
     }
 
-    /** The confirmation the page shows after an action, for example "Marked as posted." */
+    /** The confirmation the page shows after an action, for example "Closed without publishing." */
     public Locator actionMessage(String text) {
         return page.getByText(text, new Page.GetByTextOptions().setExact(true));
     }
