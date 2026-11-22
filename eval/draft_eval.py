@@ -63,6 +63,24 @@ CONTACT = re.compile(r"\d(?:[\s-]?\d){6,}|[\w.+-]+@[\w-]+\.\w|https?://|www\.", 
 PLACEHOLDER = re.compile(r"\[(?!Manager name\])[^\]]*\]|<[^>]+>|\{[^}]+\}")
 MARKDOWN = re.compile(r"\*\*|^#|^subject:|^\s*[-*] ", re.I | re.M)
 NUMBER = re.compile(r"\d[\d,.]*%?")
+CONCEDE = re.compile(r"clear (that )?we|unacceptable|while (it was )?in our (care|workshop|custody)|"
+                     r"we (lost|damaged|scratched|failed to|did not (complete|replace|tighten))|"
+                     r"(the )?loss of your", re.I)
+SAID_AGAIN = re.compile(r"again|third time|second time|same .* (is )?back|still", re.I)
+SAME_ISSUE = re.compile(r"(this|the same|that) (issue|problem) (again|before)|"
+                        r"not the first time you(\W?ve| have) (experienced|had|faced) (this|that|the same)|"
+                        r"repeat(ed)? (issue|problem)|this has happened before|happened again|"
+                        r"about (this|the same) (issue|problem)", re.I)
+# "Steering wheel" alone (grease on it) and the engine warning light are not reasons to stop driving.
+SAFETY = re.compile(r"brake|(?<!steering )wheel|steer(?!ing wheel)|tyre|tire|leak|fire|smoke|overheat|"
+                    r"airbag|headlight", re.I)
+# A refund the customer asks for, not one written into an injected instruction.
+REFUND_ASK = re.compile(r"(want|give me|need|please)\b.{0,20}(refund|money back)|refund me", re.I)
+DONT_DRIVE = re.compile(r"(not|n.t|avoid|stop) (to )?driv|before (you )?driv|until .{0,40}check", re.I)
+US_SPELLING = re.compile(r"apologiz|organiz|behavior|realiz|prioritiz|\bcolor|recogniz|minimiz|"
+                         r"\bcenter\b|favor\b", re.I)
+STOCK = re.compile(r"understand how frustrating|we strive|feel free|we take .{0,20}seriously|"
+                   r"your (feedback|satisfaction|experience) is important", re.I)
 
 
 def eval_url():
@@ -135,6 +153,25 @@ def check(r):
         flags.append(f"liability word: {LIABILITY.search(d).group(0)!r}")
     if r["repeat_customer"] and not REPEAT_ACK.search(d):
         flags.append("repeat complaint, no sign it acknowledges earlier let-downs")
+
+    # Rules added to the prompt after the first draft evaluation (22 Nov 2026, findings D1 to D4).
+    if CONCEDE.search(d):
+        fails.append(f"treats the allegation as fact or concedes fault: {CONCEDE.search(d).group(0)!r}")
+    if r["repeat_customer"] and not SAID_AGAIN.search(fb) and SAME_ISSUE.search(d):
+        fails.append(f"says it is the same problem again: {SAME_ISSUE.search(d).group(0)!r}")
+    if SAFETY.search(fb) and not DONT_DRIVE.search(d):
+        fails.append("safety complaint, does not ask them not to drive the car")
+    if US_SPELLING.search(d):
+        fails.append(f"American spelling: {US_SPELLING.search(d).group(0)!r}")
+    if REFUND_ASK.search(fb) and not re.search(r"refund|money back|request", d, re.I):
+        fails.append("refund request not acknowledged")
+    if "card number" in fb and not re.search(r"card", d, re.I):
+        fails.append("card number sent, no request to stop sending card details")
+    stock = [m.group(0) for m in STOCK.finditer(d)]
+    if stock:
+        flags.append(f"stock phrase: {', '.join(stock)}")
+    if r["severity"] >= 4 and re.search(r"thank you for (your )?(feedback|letting)", d[:200], re.I):
+        flags.append("opens a serious reply by thanking them")
     return fails, flags
 
 
