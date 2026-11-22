@@ -13,6 +13,7 @@ properly, against all 100 labelled replies in
 | `score_eval.py` | Sends every reply through that workflow and writes the report |
 | `hard_cases.json`, `hard_cases.py` | Layer 3: 30 hard replies (sarcasm, Pidgin/Yoruba, injection, personal data, threats, calm safety problems), each with the routes that are acceptable |
 | `failure_modes.mjs` | Layer 3: runs the routing code against simulated AI failures and routing edge cases, and checks card-number masking (`node eval/failure_modes.mjs`) |
+| `02-eval-draft-only.json`, `draft_eval.py`, `draft_cases.json` | Layer 3: the **"02-eval Draft only"** workflow (02's *Draft reply* step behind a webhook), the runner, and 21 trap complaints; see *Drafted replies* below |
 | `results/` | One CSV (every call) and one Markdown summary per run |
 | [`FINDINGS.md`](FINDINGS.md) | **What the evaluation found**, most serious first |
 
@@ -80,6 +81,27 @@ node eval/failure_modes.mjs           # Layer 3: routing edge cases + card maski
 ```
 
 A full run takes about 10 minutes and costs a few cents of OpenAI credit.
+
+## Drafted replies
+
+`02-eval-draft-only.json` is 02's *Draft reply* step (same prompt, same model and temperature)
+behind its own webhook, set up exactly as above: import, replace `REPLACE-WITH-A-RANDOM-STRING`
+in the **Eval request** path, check the **Draft model** credential, publish, and put the URL in
+`.env` as `EVAL_DRAFT_URL`. It writes nothing and alerts no one. Request: `raw_text`,
+`customer_name`, `location`, `repeat_customer`, `severity`, `service`; response: `draft`, `error`.
+
+```bash
+python eval/draft_eval.py                                        # 41 complaints x 2 drafts = 82 calls
+python eval/draft_eval.py --recheck eval/results/drafts-<stamp>.csv  # re-run the checks, no calls
+```
+
+Every draft is checked automatically against the prompt's own rules (greeting, sign-off, 60 to
+120 words, no placeholders, contact details, card digits or markdown, no other branch, no number
+the customer did not give, no use of the check-in background). Mentions of refunds or liability,
+and repeat complaints with no acknowledgement, are flagged for reading rather than failed. The
+report prints every draft in full, because politeness and whether a draft answers the actual
+complaint can only be judged by reading it. If 02's *Draft reply* prompt changes, rebuild this
+workflow from a fresh 02 export.
 
 ## How the replies are graded
 
