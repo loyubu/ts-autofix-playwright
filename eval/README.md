@@ -1,4 +1,4 @@
-# Scorer evaluation (Layer 2)
+# Scorer evaluation (Layers 2 and 3)
 
 The end-to-end suite sends one random reply per route per run: five data points, so a scorer
 that is right only most of the time can still pass by luck. This folder measures the AI scorer
@@ -12,7 +12,7 @@ properly, against all 100 labelled replies in
 | `02-eval-score-only.json` | The **"02-eval Score only"** n8n workflow, ready to import |
 | `score_eval.py` | Sends every reply through that workflow and writes the report |
 | `hard_cases.json`, `hard_cases.py` | Layer 3: 30 hard replies (sarcasm, Pidgin/Yoruba, injection, personal data, threats, calm safety problems), each with the routes that are acceptable |
-| `failure_modes.mjs` | Layer 3: runs the routing code against simulated AI failures (`node eval/failure_modes.mjs`) |
+| `failure_modes.mjs` | Layer 3: runs the routing code against simulated AI failures and routing edge cases, and checks card-number masking (`node eval/failure_modes.mjs`) |
 | `results/` | One CSV (every call) and one Markdown summary per run |
 | [`FINDINGS.md`](FINDINGS.md) | **What the evaluation found**, most serious first |
 
@@ -33,6 +33,8 @@ Eval request (webhook) → Read input → Get config (00 Config) → Score reply
 - **Same routing rules, same order** as 02's *Decide route*. The only difference is customer
   history: 02 searches Airtable for an earlier complaint, while this takes a `prior_negative`
   flag in the request, so the history override can be tested on demand.
+- **Same card masking** as 02's *Read reply*: card numbers are removed before scoring, so the
+  `raw_text` in the response is what 02 would store.
 - **It writes nothing and alerts no one**: no Airtable, no Google Sheets, no Slack, no email and
   no drafted reply. It returns the scores and the route, and that is all.
 
@@ -47,7 +49,8 @@ Request and response:
 { "route": "private_queue", "route_reason": "First negative, severity 2 below 4",
   "polarity": -0.5, "severity": 2, "confidence": 0.8, "is_feedback": true,
   "themes": "wait_time", "summary": "...", "failed": false, "error": null,
-  "config": { "severity_escalate": 4, "confidence_floor": 0.6 } }
+  "raw_text": "The car was ready two hours late.",
+  "config": { "severity_escalate": 4, "confidence_floor": 0.6, "testimonial_severity_max": 1 } }
 ```
 
 **Keep it in step with 02.** If 02's scoring prompt, model or *Decide route* rules change, copy
@@ -73,7 +76,7 @@ Needs Python 3.9+ and nothing else.
 python eval/score_eval.py --limit 2   # smoke test: 2 replies per pool, one run (10 calls)
 python eval/score_eval.py             # full: 100 replies x 3 runs + 20 history checks = 320 calls
 python eval/hard_cases.py             # Layer 3: 30 hard cases x 3 runs = 90 calls
-node eval/failure_modes.mjs           # Layer 3: routing under simulated AI failures, no calls
+node eval/failure_modes.mjs           # Layer 3: routing edge cases + card masking, no calls
 ```
 
 A full run takes about 10 minutes and costs a few cents of OpenAI credit.
