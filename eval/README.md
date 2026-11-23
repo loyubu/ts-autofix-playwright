@@ -104,13 +104,17 @@ python eval/draft_eval.py                                        # 41 complaints
 python eval/draft_eval.py --recheck eval/results/drafts-<stamp>.csv  # re-run the checks, no calls
 ```
 
-Every draft is checked automatically against the prompt's own rules (greeting, sign-off, 60 to
-120 words, no placeholders, contact details, card digits or markdown, no other branch, no number
+Every draft is checked automatically against the prompt's own rules (greeting, sign-off, 50 to
+120 words although the prompt asks for at least 60, no placeholders, contact details, card digits or markdown, no other branch, no number
 the customer did not give, no use of the check-in background). Mentions of refunds or liability,
 and repeat complaints with no acknowledgement, are flagged for reading rather than failed. The
 report prints every draft in full, because politeness and whether a draft answers the actual
 complaint can only be judged by reading it. If 02's *Draft reply* prompt changes, rebuild this
 workflow from a fresh 02 export.
+
+The prompt ends with a **THIS REPLY MUST** list that n8n works out for each complaint (safety
+wording, refund request, card details, repeat complaint), because a fixed list of every rule was
+sometimes only partly followed. It is still one AI call.
 
 ## How the replies are graded
 

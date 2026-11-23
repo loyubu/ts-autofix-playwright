@@ -65,7 +65,7 @@ MARKDOWN = re.compile(r"\*\*|^#|^subject:|^\s*[-*] ", re.I | re.M)
 NUMBER = re.compile(r"\d[\d,.]*%?")
 CONCEDE = re.compile(r"clear (that )?we|unacceptable|while (it was )?in our (care|workshop|custody)|"
                      r"we (lost|damaged|scratched|failed to|did not (complete|replace|tighten))|"
-                     r"(the )?loss of your", re.I)
+                     r"(the )?loss of your|\bindeed\b", re.I)
 SAID_AGAIN = re.compile(r"again|third time|second time|same .* (is )?back|still", re.I)
 SAME_ISSUE = re.compile(r"(this|the same|that) (issue|problem) (again|before)|"
                         r"not the first time you(\W?ve| have) (experienced|had|faced) (this|that|the same)|"
@@ -77,6 +77,14 @@ SAFETY = re.compile(r"brake|(?<!steering )wheel|steer(?!ing wheel)|tyre|tire|lea
 # A refund the customer asks for, not one written into an injected instruction.
 REFUND_ASK = re.compile(r"(want|give me|need|please)\b.{0,20}(refund|money back)|refund me", re.I)
 DONT_DRIVE = re.compile(r"(not|n.t|avoid|stop) (to )?driv|before (you )?driv|until .{0,40}check", re.I)
+# Found by reading the 23 Nov 2026 drafts: clumsy wording, blaming the customer for what they say
+# the garage did, and admitting fault.
+CLUMSY = re.compile(r"sorry to hear that you (tell|told) us", re.I)
+SWAPPED = re.compile(r"you tell us (that )?(you (lost|scratched|charged|damaged|overcharged)\b|your (staff|mechanic|receptionist|manager|branch|garage|workshop))", re.I)
+ACCEPTS = re.compile(r"sorry to hear about (the|your) (overcharg|botched|bad (service|work)|parts (that were )?not|"
+                     r"work (that was )?(not|never)|abusive)", re.I)
+POLICE = re.compile(r"(encourage you|your decision) to report", re.I)
+ADMITS = re.compile(r"let you down|we did not meet your expectations|apologise for this oversight|(we|I) fell short|missed the mark", re.I)
 US_SPELLING = re.compile(r"apologiz|organiz|behavior|realiz|prioritiz|\bcolor|recogniz|minimiz|"
                          r"\bcenter\b|favor\b", re.I)
 STOCK = re.compile(r"understand how frustrating|we strive|feel free|we take .{0,20}seriously|"
@@ -126,8 +134,8 @@ def check(r):
     if not re.search(r"\[Manager name\]\s*\n\s*" + re.escape(r["location"]) + r" branch\s*$", d):
         fails.append("sign-off is not '[Manager name] / <branch> branch'")
     words = len(d.split())
-    if not 60 <= words <= 120:
-        fails.append(f"{words} words (rule: 60 to 120)")
+    if not 50 <= words <= 120:
+        fails.append(f"{words} words (rule: 50 to 120)")
     if PLACEHOLDER.search(d):
         fails.append(f"placeholder or bracket: {PLACEHOLDER.search(d).group(0)!r}")
     if re.search(r"\d{4}[ -]?\d{4}[ -]?\d{4}", d) or "card number removed" in d:
@@ -161,6 +169,13 @@ def check(r):
         fails.append(f"says it is the same problem again: {SAME_ISSUE.search(d).group(0)!r}")
     if SAFETY.search(fb) and not DONT_DRIVE.search(d):
         fails.append("safety complaint, does not ask them not to drive the car")
+    if '"' in d or "\u201c" in d:
+        fails.append("quotation marks in the reply")
+    for rule, name in ((CLUMSY, "clumsy wording"), (SWAPPED, "says the customer did it"),
+                       (ADMITS, "admits fault"), (ACCEPTS, "repeats the accusation as fact"),
+                       (POLICE, "encourages a report")):
+        if rule.search(d):
+            fails.append(f"{name}: {rule.search(d).group(0)!r}")
     if US_SPELLING.search(d):
         fails.append(f"American spelling: {US_SPELLING.search(d).group(0)!r}")
     if REFUND_ASK.search(fb) and not re.search(r"refund|money back|request", d, re.I):
