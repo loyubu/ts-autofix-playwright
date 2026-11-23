@@ -7,6 +7,7 @@ import pageobjects.Queue;
 import utils.CustomerData;
 import utils.ReplyLibrary;
 
+import java.util.regex.Pattern;
 import java.util.stream.Stream;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
@@ -155,6 +156,10 @@ public class FeedbackRoutingTests extends BaseTest {
         dashboard.openVisit(Queue.ESCALATED, visitId);
         assertThat(dashboard.customerWords(Queue.ESCALATED)).hasText(reply);
         assertDraftedFor(dashboard, customer);
+        if (ReplyLibrary.SAFETY_COMPLAINT.contains(reply)) {
+            assertThat(dashboard.draftReply()).hasValue(
+                    Pattern.compile("do not drive the car", Pattern.CASE_INSENSITIVE));
+        }
 
         actOnAlert(dashboard, visitId);
     }
