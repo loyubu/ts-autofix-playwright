@@ -1,0 +1,22 @@
+# Runs the routing-rule and card-masking checks on every push. They use a copy of 02's routing
+# code with the AI's answers simulated: no network, secrets or packages, no records, no alerts.
+name: Routing rules
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  rules:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
+        with:
+          node-version: 24
+      - run: node eval/failure_modes.mjs

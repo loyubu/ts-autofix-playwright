@@ -198,6 +198,7 @@ def build_cases(runs):
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", type=int, default=2)
     ap.add_argument("--recheck", help="re-run the checks on a saved drafts-*.csv, with no new calls")
@@ -257,7 +258,8 @@ def main():
     (out / f"drafts-{stamp}.md").write_text("\n".join(L), encoding="utf-8")
     print("\n".join(L[:12 + len(kinds)]))
     print(f"\nReport: {out / f'drafts-{stamp}.md'}")
+    return 0 if clean == len(results) else 1  # flags are for reading; only failures count
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

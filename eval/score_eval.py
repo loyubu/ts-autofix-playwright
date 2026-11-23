@@ -85,10 +85,20 @@ def call(case, attempt=0):
             return call(case, attempt + 1)
         out = {"route": "ERROR", "error": str(e)}
     out["seconds"] = round(time.time() - t0, 1)
-    return {**case, **out}
+    return {**case, **graded(out)}
+
+
+def graded(out):
+    """An AI that could not score is an ERROR, never a correct answer. 02 sends such a reply to
+    needs_review, which is also the right route for some replies, so without this an outage
+    would look like a pass."""
+    if out.get("failed") or out.get("route") not in ROUTES:
+        return {**out, "route": "ERROR", "error": out.get("error") or "the AI did not score this reply"}
+    return out
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", type=int, default=3)
     ap.add_argument("--limit", type=int, default=0, help="replies per pool (smoke test)")
@@ -136,6 +146,9 @@ def main():
     md_path.write_text(summary, encoding="utf-8")
     print(summary)
     print(f"\nCSV: {csv_path}\nSummary: {md_path}")
+    wrong = sum(r["route"] != r["expected"] for r in results)
+    print(f"{wrong} of {len(results)} wrong or not scored" if wrong else "All correct")
+    return 1 if wrong else 0
 
 
 def summarise(results, runs):
@@ -209,6 +222,10 @@ def summarise(results, runs):
             sevs = [x.get("severity") for x in by_reply[key]]
             L.append(f"- {r['pool']}#{r['idx']} severities {sevs}: \"{r['raw_text']}\"")
         L.append("")
+
+    errors = [r for r in results if r["route"] == "ERROR"]
+    if errors:
+        L += ["## Not scored", "", f"{len(errors)} call(s) failed, for example: {errors[0].get('error')}", ""]
 
     secs = sorted(r["seconds"] for r in results if r["route"] != "ERROR")
     if secs:

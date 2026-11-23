@@ -3,6 +3,7 @@ injection, personal data, threats, tone against severity).
 
 Each case in hard_cases.json lists the routes that are acceptable, since several have more than
 one fair answer. A case passes only if EVERY run lands in an acceptable route.
+A reply the AI failed to score never passes, even where needs_review is acceptable.
 
     python eval/hard_cases.py            # 3 runs per case
     python eval/hard_cases.py --runs 1
@@ -11,6 +12,7 @@ import argparse
 import csv
 import datetime as dt
 import json
+import sys
 from concurrent.futures import ThreadPoolExecutor
 from pathlib import Path
 
@@ -20,6 +22,7 @@ CHECK_IN = "Full service and oil change."
 
 
 def main():
+    sys.stdout.reconfigure(encoding="utf-8")
     ap = argparse.ArgumentParser()
     ap.add_argument("--runs", type=int, default=3)
     args = ap.parse_args()
@@ -68,7 +71,8 @@ def main():
     text = "\n".join(L)
     (out / f"hard-cases-{stamp}.md").write_text(text, encoding="utf-8")
     print(text)
+    return 0 if passed == len(cases) else 1
 
 
 if __name__ == "__main__":
-    main()
+    sys.exit(main())

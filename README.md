@@ -70,6 +70,7 @@ suite skips the two escalation tests.
 |---|---|---|
 | `weekly-tests.yml` | Mondays at 08:17 Lagos time | `execute-all-tests` |
 | `weekly-tests.yml` | On demand (Actions → Run workflow) | your choice of suite |
+| `routing-rules.yml` | Every push | `eval/failure_modes.mjs`: routing rules and card masking, with no AI calls, records or alerts |
 
 A full run takes about 2–3 minutes, most of it spent waiting for n8n to score each reply. Reports are
 uploaded as an artifact on every run. Traces are **not** uploaded from CI: a trace records every

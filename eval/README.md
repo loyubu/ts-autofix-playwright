@@ -82,6 +82,15 @@ node eval/failure_modes.mjs           # Layer 3: routing edge cases + card maski
 
 A full run takes about 10 minutes and costs a few cents of OpenAI credit.
 
+Every script exits with an error if any check fails, so a failure cannot look like a success. A
+reply the AI failed to score counts as an error, never as a correct `needs_review`. For drafts,
+only broken rules count; flags are for reading. `failure_modes.mjs` checks the reason as well as
+the route, and GitHub runs it on every push (`.github/workflows/routing-rules.yml`). The others
+call the AI, so they are run by hand.
+
+These scripts test copies of 02's steps. If live 02 changes and the copy here does not, the
+results describe the old version; only the end-to-end tests exercise 02 itself.
+
 ## Drafted replies
 
 `02-eval-draft-only.json` is 02's *Draft reply* step (same prompt, same model and temperature)
