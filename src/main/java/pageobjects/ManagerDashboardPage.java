@@ -16,6 +16,7 @@ import java.util.regex.Pattern;
 public class ManagerDashboardPage extends BasePage {
 
     private static final Duration POLL_INTERVAL = Duration.ofSeconds(10);
+    private static final int SUMMARY_COLUMN = 4;
     private static final int SEVERITY_COLUMN = 5;
     private static final int REASON_COLUMN = 6;
 
@@ -96,15 +97,25 @@ public class ManagerDashboardPage extends BasePage {
         return row(queue, visitId).locator("td").nth(REASON_COLUMN).innerText().trim();
     }
 
+    public String getSummary(Queue queue, String visitId) {
+        reveal(queue, visitId);
+        return row(queue, visitId).locator("td").nth(SUMMARY_COLUMN).innerText().trim();
+    }
+
     public int getSeverity(Queue queue, String visitId) {
         reveal(queue, visitId);
         return Integer.parseInt(row(queue, visitId).locator("td").nth(SEVERITY_COLUMN).innerText().trim());
     }
 
-    /** Opens a row to show what the customer wrote, the drafted reply and the action buttons. */
+    /**
+     * Opens a row to show what the customer wrote, the drafted reply and the action buttons.
+     * Clicking an open row would close it, so a row that is already open is left alone.
+     */
     public ManagerDashboardPage openVisit(Queue queue, String visitId) {
         reveal(queue, visitId);
-        row(queue, visitId).click();
+        if (!"true".equals(row(queue, visitId).getAttribute("aria-expanded"))) {
+            row(queue, visitId).click();
+        }
         return this;
     }
 

@@ -87,6 +87,13 @@ public class FeedbackRoutingTests extends BaseTest {
         assertRoutedTo(dashboard, secondVisit, Queue.ESCALATED);
         Assert.assertTrue(dashboard.getReason(Queue.ESCALATED, secondVisit).startsWith("Repeat complaint"),
                 "Unexpected reason: " + dashboard.getReason(Queue.ESCALATED, secondVisit));
+        // Below 4, severity alone would not escalate it, so this proves the history did.
+        Assert.assertTrue(dashboard.getSeverity(Queue.ESCALATED, secondVisit) < 4,
+                "A mild repeat complaint should be below severity 4, or it would escalate without its history.");
+
+        dashboard.openVisit(Queue.ESCALATED, secondVisit);
+        assertThat(dashboard.customerWords(Queue.ESCALATED)).hasText(reply);
+        assertDraftedFor(dashboard, customer);
 
         actOnAlert(dashboard, secondVisit);
     }
@@ -103,10 +110,16 @@ public class FeedbackRoutingTests extends BaseTest {
 
         ManagerDashboardPage dashboard = signInAsManager();
         assertRoutedTo(dashboard, visitId, Queue.NEEDS_REVIEW);
-        Assert.assertTrue(dashboard.getReason(Queue.NEEDS_REVIEW, visitId).endsWith("Please read it."),
-                "Unexpected reason: " + dashboard.getReason(Queue.NEEDS_REVIEW, visitId));
+        // The whole reason, because a failed or unsure AI also ends "Please read it."
+        Assert.assertEquals(dashboard.getReason(Queue.NEEDS_REVIEW, visitId),
+                "Reply unclear or not about the visit. Please read it.");
+        // The scoring prompt's fixed summary, so nothing from the check-in has leaked into it.
+        Assert.assertEquals(dashboard.getSummary(Queue.NEEDS_REVIEW, visitId),
+                "The reply could not be understood.");
 
-        dashboard.openVisit(Queue.NEEDS_REVIEW, visitId).clickAction("Mark resolved");
+        dashboard.openVisit(Queue.NEEDS_REVIEW, visitId);
+        assertThat(dashboard.customerWords(Queue.NEEDS_REVIEW)).hasText(reply);
+        dashboard.clickAction("Mark resolved");
         assertLeftTheQueues(dashboard, Queue.NEEDS_REVIEW, visitId);
     }
 
@@ -124,6 +137,10 @@ public class FeedbackRoutingTests extends BaseTest {
                 "Unexpected reason: " + dashboard.getReason(Queue.ESCALATED, visitId));
         Assert.assertTrue(dashboard.getSeverity(Queue.ESCALATED, visitId) >= 4,
                 "A serious complaint should be severity 4 or 5.");
+
+        dashboard.openVisit(Queue.ESCALATED, visitId);
+        assertThat(dashboard.customerWords(Queue.ESCALATED)).hasText(reply);
+        assertDraftedFor(dashboard, customer);
 
         actOnAlert(dashboard, visitId);
     }

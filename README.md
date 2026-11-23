@@ -27,15 +27,17 @@ full journey:
 3. **Reply** on the n8n feedback form, the same form the customer's email links to.
 4. **Sign in as the manager**, wait for the reply to be scored, and assert which queue it landed
    in and why.
-5. **Act on it as the manager**, and assert the dashboard updates.
+5. **Act on it as the manager**, and assert the dashboard updates. Where acting should clear the
+   visit, the test reloads the dashboard and checks it is gone from all four queues, because a row
+   also disappears if the manager is signed out.
 
 | Test | Customer's reply | Expected queue | Manager action |
 |---|---|---|---|
-| `positiveFeedbackIsReadyToPost` | Pleased with the work (permission box unticked) | **Ready to post**, "Positive", "Customer allowed publishing: No" | Close without publishing |
-| `firstComplaintGoesToPrivateDrafts` | A minor complaint, first time | **Private drafts**, severity below 4, with a drafted reply | Mark sent (own email) |
-| `repeatComplaintIsEscalated` | Two visits by the same customer: a first complaint, then a deliberately mild one | **Escalated**, "Repeat complaint" | Mark alert acted on |
-| `unreadableReplyNeedsReview` | Gibberish, after a long complaint at check-in | **Needs review**, "Please read it." | Mark resolved |
-| `seriousComplaintIsEscalated` | Damage, safety or money lost | **Escalated**, severity 4 or 5 | Mark alert acted on |
+| `positiveFeedbackIsReadyToPost` | Pleased with the work (permission box unticked) | **Ready to post**, "Positive", "Customer allowed publishing: No", the customer's exact words | Close without publishing |
+| `firstComplaintGoesToPrivateDrafts` | A minor complaint, first time | **Private drafts**, severity below 4, the customer's exact words, and a draft addressed to them and signed for their branch | Mark sent (own email) |
+| `repeatComplaintIsEscalated` | Two visits by the same customer: a first complaint, then a deliberately mild one | **Escalated**, "Repeat complaint", severity below 4 (so history alone escalated it), the customer's exact words and their draft | Mark alert acted on |
+| `unreadableReplyNeedsReview` | Gibberish, after a long complaint at check-in | **Needs review**, "Reply unclear or not about the visit. Please read it." (so an AI failure cannot pass), the fixed summary and the customer's exact words | Mark resolved |
+| `seriousComplaintIsEscalated` | Damage, safety or money lost | **Escalated**, "Severity", severity 4 or 5, the customer's exact words and their draft | Mark alert acted on |
 
 Each test picks its reply at random from a pool of **20** (see `ReplyLibrary`), so every run
 tests the AI scorer with different wording. Customers are generated with
@@ -66,7 +68,7 @@ suite skips the two escalation tests.
 
 | Workflow | When | Suite |
 |---|---|---|
-| `weekly-tests.yml` | Mondays at 08:17 Lagos time (**paused** during the move to self-hosted n8n) | `execute-all-tests` |
+| `weekly-tests.yml` | Mondays at 08:17 Lagos time | `execute-all-tests` |
 | `weekly-tests.yml` | On demand (Actions → Run workflow) | your choice of suite |
 
 A full run takes about 2–3 minutes, most of it spent waiting for n8n to score each reply. Reports are

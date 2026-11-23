@@ -34,7 +34,7 @@
     {
       "parameters": {
         "promptType": "define",
-        "text": "=THE CUSTOMER'S FEEDBACK (reply to this, and only this), between the markers:\n<<<\n{{ $('Read input').first().json.raw_text }}\n>>>\n\nDETAILS FOR THE REPLY:\nCustomer: {{ $('Read input').first().json.customer_name }}\nBranch: {{ $('Read input').first().json.location }}\nRepeat complaint: {{ $('Read input').first().json.repeat_customer ? 'yes' : 'no' }}\nSeverity: {{ $('Read input').first().json.severity }} of 5\n\nBACKGROUND ONLY (do not mention it unless the feedback above mentions it too):\nProblem the customer reported at check-in, before the repair: {{ $('Read input').first().json.service }}",
+        "text": "=THE CUSTOMER'S FEEDBACK (reply to this, and only this), between the markers:\n<<<\n{{ $('Read input').first().json.raw_text }}\n>>>\n\nDETAILS FOR THE REPLY:\nCustomer: {{ $('Read input').first().json.customer_name.trim().split(/\\s+/)[0] }}\nBranch: {{ $('Read input').first().json.location }}\nRepeat complaint: {{ $('Read input').first().json.repeat_customer ? 'yes' : 'no' }}\nSeverity: {{ $('Read input').first().json.severity }} of 5\n\nBACKGROUND ONLY (do not mention it unless the feedback above mentions it too):\nProblem the customer reported at check-in, before the repair: {{ $('Read input').first().json.service }}",
         "messages": {
           "messageValues": [
             {
