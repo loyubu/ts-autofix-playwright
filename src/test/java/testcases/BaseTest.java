@@ -6,6 +6,7 @@ import com.microsoft.playwright.BrowserType;
 import com.microsoft.playwright.Page;
 import com.microsoft.playwright.Playwright;
 import com.microsoft.playwright.Tracing;
+import com.microsoft.playwright.assertions.LocatorAssertions;
 import com.microsoft.playwright.assertions.PlaywrightAssertions;
 import org.testng.Assert;
 import org.testng.ITestResult;
@@ -24,6 +25,7 @@ import utils.CustomerData;
 import java.nio.file.Paths;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.regex.Pattern;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
@@ -124,6 +126,24 @@ public class BaseTest {
                 .orElseThrow(() -> new AssertionError(visitId + " did not reach the manager dashboard within "
                         + Constants.routingTimeout().toSeconds() + "s. Check n8n's 02 Reply & Route executions."));
         Assert.assertEquals(actual, expected, visitId + " was routed to the wrong queue.");
+    }
+
+    /**
+     * Waits for the open row's drafted reply, then asserts it is addressed to this customer by
+     * first name and signed off for their branch, two fixed rules of n8n's draft prompt. Wording,
+     * length and tone are judged by eval/draft_eval.py, not here.
+     */
+    protected void assertDraftedFor(ManagerDashboardPage dashboard, CustomerData customer) {
+        // n8n saves the drafted reply a few seconds after the row; the page picks it up on refresh.
+        assertThat(dashboard.draftReply()).not().hasValue("",
+                new LocatorAssertions.HasValueOptions().setTimeout(90_000));
+        String draft = dashboard.draftReply().inputValue().strip();
+        Assert.assertTrue(draft.startsWith("Dear " + customer.getFirstName() + ","),
+                "The draft is not addressed to " + customer.getFirstName() + ":\n" + draft);
+        Pattern signOff = Pattern.compile(
+                "\\[Manager name\\]\\s*\\n\\s*" + Pattern.quote(customer.getBranch()) + " branch$");
+        Assert.assertTrue(signOff.matcher(draft).find(),
+                "The draft is not signed off for the " + customer.getBranch() + " branch:\n" + draft);
     }
 
     /**

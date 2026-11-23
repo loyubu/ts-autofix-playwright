@@ -1,14 +1,11 @@
 package testcases;
 
-import com.microsoft.playwright.assertions.LocatorAssertions;
 import org.testng.Assert;
 import org.testng.annotations.Test;
 import pageobjects.ManagerDashboardPage;
 import pageobjects.Queue;
 import utils.CustomerData;
 import utils.ReplyLibrary;
-
-import java.util.regex.Pattern;
 
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
@@ -60,10 +57,8 @@ public class FeedbackRoutingTests extends BaseTest {
                 "A first complaint in Private drafts should be below severity 4.");
 
         dashboard.openVisit(Queue.PRIVATE_DRAFTS, visitId);
-        // n8n saves the drafted reply a few seconds after the row; the page picks it up on refresh.
-        assertThat(dashboard.draftReply()).not().hasValue("",
-                new LocatorAssertions.HasValueOptions().setTimeout(90_000));
-        assertThat(dashboard.draftReply()).hasValue(Pattern.compile("^Dear "));
+        assertThat(dashboard.customerWords(Queue.PRIVATE_DRAFTS)).hasText(reply);
+        assertDraftedFor(dashboard, customer);
 
         // "Mark sent (own email)" records the reply without the site emailing anyone.
         dashboard.clickAction("Mark sent (own email)");
