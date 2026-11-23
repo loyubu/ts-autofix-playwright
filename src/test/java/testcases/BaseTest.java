@@ -125,4 +125,21 @@ public class BaseTest {
                         + Constants.routingTimeout().toSeconds() + "s. Check n8n's 02 Reply & Route executions."));
         Assert.assertEquals(actual, expected, visitId + " was routed to the wrong queue.");
     }
+
+    /**
+     * Asserts that acting on a visit moved it out of its queue for good. The row disappearing is
+     * not enough: it also disappears if the manager is signed out or the page fails to load. So
+     * this also checks the dashboard is still there, then reloads it and looks in every queue.
+     */
+    protected void assertLeftTheQueues(ManagerDashboardPage dashboard, Queue from, String visitId) {
+        assertThat(dashboard.row(from, visitId)).hasCount(0);
+        assertThat(dashboard.signOutLink()).isVisible();
+
+        page.reload();
+        assertThat(dashboard.signOutLink()).isVisible();
+        for (Queue queue : Queue.values()) {
+            Assert.assertFalse(dashboard.reveal(queue, visitId),
+                    visitId + " was acted on but is still in " + queue.title() + " after a reload.");
+        }
+    }
 }

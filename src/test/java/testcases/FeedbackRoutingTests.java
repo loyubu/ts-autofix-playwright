@@ -37,11 +37,11 @@ public class FeedbackRoutingTests extends BaseTest {
         // the page says so, offers no Publish button, and the test closes it without publishing.
         // The weekly run therefore never puts anything on the public reviews page.
         dashboard.openVisit(Queue.READY_TO_POST, visitId);
+        assertThat(dashboard.customerWords(Queue.READY_TO_POST)).hasText(reply);
         assertThat(dashboard.publishingPermission()).containsText("No");
         assertThat(dashboard.actionButton("Publish on website")).hasCount(0);
         dashboard.clickAction("Close without publishing");
-        // Acting moves the row out of the queue, so the check is that it has gone.
-        assertThat(dashboard.row(Queue.READY_TO_POST, visitId)).hasCount(0);
+        assertLeftTheQueues(dashboard, Queue.READY_TO_POST, visitId);
     }
 
     @Test(priority = 2, groups = {"Regression", "NoAlerts", "FirstComplaint"})
@@ -67,7 +67,7 @@ public class FeedbackRoutingTests extends BaseTest {
 
         // "Mark sent (own email)" records the reply without the site emailing anyone.
         dashboard.clickAction("Mark sent (own email)");
-        assertThat(dashboard.row(Queue.PRIVATE_DRAFTS, visitId)).hasCount(0);
+        assertLeftTheQueues(dashboard, Queue.PRIVATE_DRAFTS, visitId);
     }
 
     @Test(priority = 3, groups = {"Regression", "Escalation", "RepeatComplaint"})
@@ -81,7 +81,7 @@ public class FeedbackRoutingTests extends BaseTest {
         ManagerDashboardPage dashboard = signInAsManager();
         assertRoutedTo(dashboard, firstVisit, Queue.PRIVATE_DRAFTS);
         dashboard.openVisit(Queue.PRIVATE_DRAFTS, firstVisit).clickAction("Mark sent (own email)");
-        assertThat(dashboard.row(Queue.PRIVATE_DRAFTS, firstVisit)).hasCount(0);
+        assertLeftTheQueues(dashboard, Queue.PRIVATE_DRAFTS, firstVisit);
 
         // Visit 2: the same customer, a deliberately mild complaint. History alone escalates it.
         String reply = ReplyLibrary.randomFrom(ReplyLibrary.REPEAT_COMPLAINT);
@@ -112,7 +112,7 @@ public class FeedbackRoutingTests extends BaseTest {
                 "Unexpected reason: " + dashboard.getReason(Queue.NEEDS_REVIEW, visitId));
 
         dashboard.openVisit(Queue.NEEDS_REVIEW, visitId).clickAction("Mark resolved");
-        assertThat(dashboard.row(Queue.NEEDS_REVIEW, visitId)).hasCount(0);
+        assertLeftTheQueues(dashboard, Queue.NEEDS_REVIEW, visitId);
     }
 
     @Test(priority = 5, groups = {"Regression", "Escalation", "SeriousComplaint"})

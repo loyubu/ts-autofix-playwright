@@ -108,6 +108,11 @@ public class ManagerDashboardPage extends BasePage {
         return this;
     }
 
+    /** "What the customer wrote" in a queue's open row. */
+    public Locator customerWords(Queue queue) {
+        return queue(queue).locator("blockquote");
+    }
+
     /** The drafted reply box of the open row (Escalated and Private drafts only). */
     public Locator draftReply() {
         return page.locator("textarea[id^='draft-']");
