@@ -4,7 +4,8 @@ import java.util.List;
 import java.util.concurrent.ThreadLocalRandom;
 
 /**
- * Customer words for each scenario: 20 feedback replies per test, plus the fault reported at
+ * Customer words for each scenario: 20 feedback replies per test (the
+ * serious test's 20 are split into safety and other complaints), plus the fault reported at
  * check-in. Each test picks one at random, so every run exercises the AI scorer with different
  * wording.
  *
@@ -13,7 +14,8 @@ import java.util.concurrent.ThreadLocalRandom;
  *  - FIRST_COMPLAINT: clearly unhappy but minor (delays, untidiness, slow communication),
  *    never damage, money lost, safety or threats, so severity stays below 4.  -> Private drafts
  *  - REPEAT_COMPLAINT: mild on purpose; only the customer's history escalates it. -> Escalated
- *  - SERIOUS_COMPLAINT: damage, safety or money lost, severity 4 or 5.       -> Escalated
+ *  - SAFETY_COMPLAINT: the car was or may be unsafe to drive, severity always 5. -> Escalated
+ *  - SERIOUS_COMPLAINT: damage, money lost, theft, abuse or threats, severity 4 or 5. -> Escalated
  *  - UNREADABLE: no meaning at all.                                          -> Needs review
  */
 public final class ReplyLibrary {
@@ -84,27 +86,29 @@ public final class ReplyLibrary {
             "The seat position had been changed again.",
             "I had to ask twice for an update.");
 
-    public static final List<String> SERIOUS_COMPLAINT = List.of(
+    public static final List<String> SAFETY_COMPLAINT = List.of(
             "The brakes failed on the way home from your garage. This is dangerous.",
             "My steering locked on the expressway the day after your repair. I could have been killed.",
-            "You scratched the whole side of my car and nobody owned up to it.",
             "The engine caught fire two days after your mechanic worked on it.",
             "A wheel came loose on the road after your service. The nuts were not tightened.",
-            "You charged me for new parts but the old worn parts are still on the car. I want my money back.",
-            "My windscreen was cracked while the car was in your workshop and you refused to fix it.",
             "The car now leaks fuel after your repair. This is a serious safety risk.",
-            "Your staff were abusive and threatened me when I asked about the bill.",
             "The airbag warning light came on after your repair and the airbag is now disabled.",
-            "My car was dented in your car park and the branch manager refused to take responsibility.",
-            "I was overcharged by over two hundred thousand naira for work that was never done.",
             "The brakes are making a grinding noise since your service and the car barely stops.",
-            "Someone took my laptop from the car while it was with you. I am reporting this to the police.",
-            "Your mechanic damaged the gearbox and now the car will not move at all.",
             "The tyre you fitted burst on the motorway. My family was in the car. Unacceptable.",
             "Oil was pouring out of the engine the same day I collected the car. The engine is now damaged.",
             "The car overheated and the engine seized right after your repair. It needs a new engine.",
-            "You lost my spare key and charged me again for the same repair. I am taking legal action.",
             "The headlights stopped working on the way home at night after your electrical repair. Very dangerous.");
+
+    public static final List<String> SERIOUS_COMPLAINT = List.of(
+            "You scratched the whole side of my car and nobody owned up to it.",
+            "You charged me for new parts but the old worn parts are still on the car. I want my money back.",
+            "My windscreen was cracked while the car was in your workshop and you refused to fix it.",
+            "Your staff were abusive and threatened me when I asked about the bill.",
+            "My car was dented in your car park and the branch manager refused to take responsibility.",
+            "I was overcharged by over two hundred thousand naira for work that was never done.",
+            "Someone took my laptop from the car while it was with you. I am reporting this to the police.",
+            "Your mechanic damaged the gearbox and now the car will not move at all.",
+            "You lost my spare key and charged me again for the same repair. I am taking legal action.");
 
     public static final List<String> UNREADABLE = List.of(
             "k ?? blue 12",

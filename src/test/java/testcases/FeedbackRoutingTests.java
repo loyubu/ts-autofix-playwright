@@ -7,6 +7,8 @@ import pageobjects.Queue;
 import utils.CustomerData;
 import utils.ReplyLibrary;
 
+import java.util.stream.Stream;
+
 import static com.microsoft.playwright.assertions.PlaywrightAssertions.assertThat;
 
 /**
@@ -132,7 +134,9 @@ public class FeedbackRoutingTests extends BaseTest {
     @Test(priority = 5, groups = {"Regression", "Escalation", "SeriousComplaint"})
     public void seriousComplaintIsEscalated() {
         CustomerData customer = new CustomerData();
-        String reply = ReplyLibrary.randomFrom(ReplyLibrary.SERIOUS_COMPLAINT);
+        // Drawn from both pools as one, so a safety complaint comes up about half the time.
+        String reply = ReplyLibrary.randomFrom(Stream.concat(ReplyLibrary.SAFETY_COMPLAINT.stream(),
+                ReplyLibrary.SERIOUS_COMPLAINT.stream()).toList());
 
         String visitId = checkInAndCloseJob(customer, ReplyLibrary.randomFrom(ReplyLibrary.CHECK_IN_ISSUES));
         submitFeedback(visitId, reply);
@@ -143,6 +147,10 @@ public class FeedbackRoutingTests extends BaseTest {
                 "Unexpected reason: " + dashboard.getReason(Queue.ESCALATED, visitId));
         Assert.assertTrue(dashboard.getSeverity(Queue.ESCALATED, visitId) >= 4,
                 "A serious complaint should be severity 4 or 5.");
+        if (ReplyLibrary.SAFETY_COMPLAINT.contains(reply)) {
+            Assert.assertEquals(dashboard.getSeverity(Queue.ESCALATED, visitId), 5,
+                    "A safety complaint must be severity 5.");
+        }
 
         dashboard.openVisit(Queue.ESCALATED, visitId);
         assertThat(dashboard.customerWords(Queue.ESCALATED)).hasText(reply);

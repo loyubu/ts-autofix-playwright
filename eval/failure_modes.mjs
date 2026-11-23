@@ -10,11 +10,13 @@ const code = wf.nodes.find((n) => n.name === "Decide route").parameters.jsCode;
 const decide = new Function("$", code);
 
 const cfg = { confidence_floor: 0.6, severity_escalate: 4, history_lookback_days: 365 };
-function route(scored, prior = false, text = "") {
+const NO_RISK = { output: { what_happened: "none", safety_risk: false } };
+function route(scored, prior = false, text = "", check = NO_RISK) {
   const nodes = {
     "Get config": cfg,
     "Read input": { prior_negative: prior, raw_text: text },
     "Score reply": scored,
+    "Safety check": check,
   };
   return decide((name) => ({ first: () => ({ json: nodes[name] }) }))[0].json;
 }
@@ -42,6 +44,16 @@ const cases = [
   ["Confidence exactly at the floor", ok({ polarity: -0.5, severity: 2, confidence: 0.6 }), "private_queue", /^First negative/],
   ["Severity 3, just below the cut-off", ok({ polarity: -0.5, severity: 3, confidence: 0.8 }), "private_queue", /^First negative, severity 3/],
   ["Severity 4, exactly at the cut-off", ok({ polarity: -0.5, severity: 4, confidence: 0.8 }), "escalated", /^Severity 4/],
+  ["Safety danger the model scored 2", ok({ polarity: -0.2, severity: 2, confidence: 0.8 }), "escalated", /^Severity 5/, false, "", { output: { safety_risk: true } }],
+  ["Safety danger wrapped in praise, scored 0", ok({ polarity: 0.8, severity: 0, confidence: 0.8 }), "escalated", /^Severity 5/, false, "", { output: { safety_risk: true } }],
+  ["Safety danger, earlier complaint on record (history first)", ok({ polarity: -0.5, severity: 4, confidence: 0.8 }), "escalated", /^Repeat complaint/, true, "", { output: { safety_risk: true } }],
+  ["No safety danger leaves severity alone", ok({ polarity: -0.5, severity: 3, confidence: 0.8 }), "private_queue", /^First negative, severity 3/, false, "", { output: { safety_risk: false } }],
+  ["safety_risk as text is ignored", ok({ polarity: -0.5, severity: 2, confidence: 0.8 }), "private_queue", /^First negative, severity 2 below 4 \(the safety check did not run\)$/, false, "", { output: { safety_risk: "true" } }],
+  ["Safety danger, severity missing", ok({ polarity: -0.5, confidence: 0.8 }), "needs_review", FAILED, false, "", { output: { safety_risk: true } }],
+  ["Safety danger, unsure", ok({ polarity: -0.5, severity: 4, confidence: 0.4 }), "needs_review", /^The AI was unsure/, false, "", { output: { safety_risk: true } }],
+  ["Safety check errors: severity stands and the reason says so", ok({ polarity: -0.5, severity: 4, confidence: 0.8 }), "escalated", /^Severity 4 at or above 4 \(the safety check did not run\)$/, false, "", { error: { message: "timeout" } }],
+  ["Safety check errors but still carries a yes: ignored", ok({ polarity: -0.5, severity: 2, confidence: 0.8 }), "private_queue", /did not run/, false, "", { error: "boom", output: { safety_risk: true } }],
+  ["Unreadable reply, safety check says yes", { output: { is_feedback: false, polarity: 0, severity: 0, confidence: 0.1 } }, "needs_review", /^Reply unclear/, false, "", { output: { safety_risk: true } }],
   ["Severity out of range (9)", ok({ polarity: -0.5, severity: 9, confidence: 0.8 }), "escalated", /^Severity 9/],
   ["Neutral but severe", ok({ polarity: 0, severity: 5, confidence: 0.8 }), "escalated", /^Severity 5/],
   ["Neutral and harmless", ok({ polarity: 0, severity: 0, confidence: 0.8 }), "needs_review", /^Neither/],
@@ -58,10 +70,10 @@ const cases = [
 ];
 
 let pass = 0;
-for (const [name, scored, expected, reason, prior, text] of cases) {
+for (const [name, scored, expected, reason, prior, text, check] of cases) {
   let got;
   try {
-    got = route(scored, prior, text);
+    got = route(scored, prior, text, check);
   } catch (e) {
     got = { route: "CRASH", route_reason: e.message };
   }

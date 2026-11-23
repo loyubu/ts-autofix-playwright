@@ -11,7 +11,7 @@ properly, against all 100 labelled replies in
 |---|---|
 | `02-eval-score-only.json` | The **"02-eval Score only"** n8n workflow, ready to import |
 | `score_eval.py` | Sends every reply through that workflow and writes the report |
-| `hard_cases.json`, `hard_cases.py` | Layer 3: 30 hard replies (sarcasm, Pidgin/Yoruba, injection, personal data, threats, calm safety problems), each with the routes that are acceptable |
+| `hard_cases.json`, `hard_cases.py` | Layer 3: 58 hard replies (sarcasm, Pidgin/Yoruba, injection, personal data, threats, safety dangers, things that are not dangers), each with the routes, and for some the severities, that are acceptable |
 | `failure_modes.mjs` | Layer 3: runs the routing code against simulated AI failures and routing edge cases, and checks card-number masking (`node eval/failure_modes.mjs`) |
 | `02-eval-draft-only.json`, `draft_eval.py`, `draft_cases.json` | Layer 3: the **"02-eval Draft only"** workflow (02's *Draft reply* step behind a webhook), the runner, and 21 trap complaints; see *Drafted replies* below |
 | `results/` | One CSV (every call) and one Markdown summary per run |
@@ -23,12 +23,15 @@ It is the scoring step and routing rules of **02 Reply & Route**, copied word fo
 webhook:
 
 ```
-Eval request (webhook) → Read input → Get config (00 Config) → Score reply → Decide route → Return result
+Eval request (webhook) → Read input → Get config (00 Config) → Score reply → Safety check → Decide route → Return result
                                                     OpenAI Chat Model + Structured Output Parser ┘
 ```
 
 - **Same prompt, same model (gpt-4o-mini, temperature 0), same output parser** as 02's
   *Score reply*.
+- **Same *Safety check***: a second, separate AI call that answers only whether the car was or may be
+  unsafe. A yes raises severity to 5 in *Decide route*. If it fails, *Score reply*'s severity stands
+  and the reason says the check did not run; here that counts as an error, never a pass.
 - **Same thresholds**: it calls *00 Config*, just as 02 does, so the severity cut-off and
   confidence floor are the live values.
 - **Same routing rules, same order** as 02's *Decide route*. The only difference is customer
@@ -76,7 +79,7 @@ Needs Python 3.9+ and nothing else.
 ```bash
 python eval/score_eval.py --limit 2   # smoke test: 2 replies per pool, one run (10 calls)
 python eval/score_eval.py             # full: 100 replies x 3 runs + 20 history checks = 320 calls
-python eval/hard_cases.py             # Layer 3: 30 hard cases x 3 runs = 90 calls
+python eval/hard_cases.py             # Layer 3: 58 hard cases x 3 runs = 174 calls
 node eval/failure_modes.mjs           # Layer 3: routing edge cases + card masking, no calls
 ```
 
@@ -124,6 +127,7 @@ sometimes only partly followed. It is still one AI call.
 | `FIRST_COMPLAINT` | private_queue | minor problems, severity below 4 |
 | `REPEAT_COMPLAINT` | private_queue | mild on purpose: **on its own** it is an ordinary complaint |
 | `REPEAT_COMPLAINT` + `prior_negative` | escalated | the history override, run once per reply |
+| `SAFETY_COMPLAINT` | escalated | severity must be 5 |
 | `SERIOUS_COMPLAINT` | escalated | severity 4 or 5 |
 | `UNREADABLE` | needs_review | |
 

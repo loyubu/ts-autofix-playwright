@@ -32,9 +32,13 @@ EXPECTED = {
     "POSITIVE": "ready_to_post",
     "FIRST_COMPLAINT": "private_queue",
     "REPEAT_COMPLAINT": "private_queue",
+    "SAFETY_COMPLAINT": "escalated",
     "SERIOUS_COMPLAINT": "escalated",
     "UNREADABLE": "needs_review",
 }
+# Severities a pool may have, besides its route. A safety danger is always 5, not just above the
+# cut-off.
+EXPECTED_SEVERITY = {"SAFETY_COMPLAINT": {5}, "SERIOUS_COMPLAINT": {4, 5}}
 ROUTES = ["ready_to_post", "private_queue", "escalated", "needs_review"]
 
 
@@ -88,10 +92,16 @@ def call(case, attempt=0):
     return {**case, **graded(out)}
 
 
+def bad_severity(r):
+    return r["pool"] in EXPECTED_SEVERITY and r.get("severity") not in EXPECTED_SEVERITY[r["pool"]]
+
+
 def graded(out):
     """An AI that could not score is an ERROR, never a correct answer. 02 sends such a reply to
     needs_review, which is also the right route for some replies, so without this an outage
     would look like a pass."""
+    if out.get("safety_error"):
+        return {**out, "route": "ERROR", "error": f"the safety check did not run: {out['safety_error']}"}
     if out.get("failed") or out.get("route") not in ROUTES:
         return {**out, "route": "ERROR", "error": out.get("error") or "the AI did not score this reply"}
     return out
@@ -132,7 +142,7 @@ def main():
     stamp = dt.datetime.now().strftime("%Y%m%d-%H%M")
     out_dir = ROOT / "results"
     out_dir.mkdir(exist_ok=True)
-    fields = ["pool", "idx", "run", "prior_negative", "expected", "route", "polarity", "severity",
+    fields = ["pool", "idx", "run", "prior_negative", "expected", "route", "polarity", "severity", "model_severity", "safety_risk",
               "confidence", "is_feedback", "themes", "summary", "route_reason", "failed", "error",
               "seconds", "location", "service", "raw_text"]
     csv_path = out_dir / f"scores-{stamp}.csv"
@@ -147,8 +157,10 @@ def main():
     print(summary)
     print(f"\nCSV: {csv_path}\nSummary: {md_path}")
     wrong = sum(r["route"] != r["expected"] for r in results)
-    print(f"{wrong} of {len(results)} wrong or not scored" if wrong else "All correct")
-    return 1 if wrong else 0
+    wrong_sev = sum(bad_severity(r) for r in results)
+    print(f"{wrong} of {len(results)} wrong route or not scored, {wrong_sev} wrong severity"
+          if wrong or wrong_sev else "All correct")
+    return 1 if wrong or wrong_sev else 0
 
 
 def summarise(results, runs):
@@ -206,7 +218,7 @@ def summarise(results, runs):
 
     L += ["## Severity near the cut-off (3, 4 or 5 on any complaint)", "",
           "| Pool | Severity counts (all runs) |", "|---|---|"]
-    for pool in ("FIRST_COMPLAINT", "REPEAT_COMPLAINT", "SERIOUS_COMPLAINT"):
+    for pool in ("FIRST_COMPLAINT", "REPEAT_COMPLAINT", "SAFETY_COMPLAINT", "SERIOUS_COMPLAINT"):
         c = Counter(r.get("severity") for r in main_rows if r["pool"] == pool)
         L.append(f"| {pool} | " + ", ".join(f"sev {k}: {c[k]}" for k in sorted(c, key=lambda x: (x is None, x))) + " |")
     L.append("")
@@ -222,6 +234,14 @@ def summarise(results, runs):
             sevs = [x.get("severity") for x in by_reply[key]]
             L.append(f"- {r['pool']}#{r['idx']} severities {sevs}: \"{r['raw_text']}\"")
         L.append("")
+
+    sev_wrong = [r for r in main_rows if bad_severity(r)]
+    sev_rows = [r for r in main_rows if r["pool"] in EXPECTED_SEVERITY]
+    L += ["## Severity checks", "",
+          f"Right severity (safety 5, other serious 4 or 5): {len(sev_rows) - len(sev_wrong)}/{len(sev_rows)}.", ""]
+    for r in sev_wrong:
+        L.append(f"- {r['pool']}#{r['idx']} run {r['run']}: severity {r.get('severity')} \"{r['raw_text']}\"")
+    L.append("")
 
     errors = [r for r in results if r["route"] == "ERROR"]
     if errors:

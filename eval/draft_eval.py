@@ -47,7 +47,8 @@ CHECK_IN_WORDS = [
 LIBRARY_PICK = {
     "FIRST_COMPLAINT": ([0, 3, 6, 9, 12, 15, 18], 2, False),
     "REPEAT_COMPLAINT": ([0, 4, 8, 12, 16], 1, True),
-    "SERIOUS_COMPLAINT": ([0, 2, 4, 5, 8, 11, 13, 18], 5, False),
+    "SAFETY_COMPLAINT": ([0, 3], 5, False),
+    "SERIOUS_COMPLAINT": ([0, 1, 3, 5, 6, 8], 5, False),
 }
 
 MONEY = re.compile(r"refund|money back|reimburs|compensat|discount|free of charge|(?<!feel )\bfree\b|waive|"

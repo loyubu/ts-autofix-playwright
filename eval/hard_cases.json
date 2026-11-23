@@ -35,10 +35,12 @@
   "group": "Mixed",
   "text": "Lovely staff, but the brake squeal is back.",
   "ok": [
-   "private_queue",
-   "needs_review"
+   "escalated"
   ],
-  "why": "Praise plus a repair that did not hold. Must not be posted as a testimonial."
+  "why": "Any brake fault counts as a safety danger, even after praise (decided 23 Nov 2026).",
+  "sev": [
+   5
+  ]
  },
  {
   "id": "mixed-overcharge",
@@ -237,7 +239,10 @@
   "ok": [
    "escalated"
   ],
-  "why": "Calm words, safety danger. The two-axis scoring exists for exactly this."
+  "why": "Calm words, safety danger. The two-axis scoring exists for exactly this.",
+  "sev": [
+   5
+  ]
  },
  {
   "id": "furious-trivial",
@@ -275,7 +280,10 @@
    "escalated",
    "needs_review"
   ],
-  "why": "Safety failure wrapped in praise. Ready to post would offer it as a testimonial."
+  "why": "Safety failure wrapped in praise. Ready to post would offer it as a testimonial.",
+  "sev": [
+   5
+  ]
  },
  {
   "id": "praise-soft-brakes",
@@ -285,7 +293,10 @@
    "escalated",
    "needs_review"
   ],
-  "why": "Soft brakes are a safety danger, however pleased the customer sounds."
+  "why": "Soft brakes are a safety danger, however pleased the customer sounds.",
+  "sev": [
+   5
+  ]
  },
  {
   "id": "praise-fire",
@@ -295,6 +306,359 @@
    "escalated",
    "needs_review"
   ],
-  "why": "Critical safety failure after glowing praise."
+  "why": "Critical safety failure after glowing praise.",
+  "sev": [
+   5
+  ]
+ },
+ {
+  "id": "safe-abs",
+  "group": "Safety is 5 (kinds of fault the prompt names)",
+  "text": "The ABS light has been on since you returned the car and the brakes lock up when it rains.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "The car was or may be unsafe to drive, so it must be 5, whatever else is mentioned."
+ },
+ {
+  "id": "safe-seatbelt",
+  "group": "Safety is 5 (kinds of fault the prompt names)",
+  "text": "After you refitted the seats my seat belt no longer latches. I have had to drive like that.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "The car was or may be unsafe to drive, so it must be 5, whatever else is mentioned."
+ },
+ {
+  "id": "safe-oil",
+  "group": "Safety is 5 (kinds of fault the prompt names)",
+  "text": "There was oil all over my driveway and the engine light is on. It was losing oil the whole way home.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "The car was or may be unsafe to drive, so it must be 5, whatever else is mentioned."
+ },
+ {
+  "id": "safe-srs",
+  "group": "Safety is 5 (kinds of fault the prompt names)",
+  "text": "SRS light is on after your dashboard repair. I was told the crash sensors were left unplugged.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "The car was or may be unsafe to drive, so it must be 5, whatever else is mentioned."
+ },
+ {
+  "id": "safe-bonnet",
+  "group": "Safety is 5 (kinds of fault the prompt names)",
+  "text": "The bonnet flew open on the bridge because it was not shut properly after the service. It dented the roof.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "The car was or may be unsafe to drive, so it must be 5, whatever else is mentioned."
+ },
+ {
+  "id": "safe-stall",
+  "group": "Safety is 5 (kinds of fault the prompt names)",
+  "text": "The car cuts out in moving traffic without warning since you changed the fuel pump.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "The car was or may be unsafe to drive, so it must be 5, whatever else is mentioned."
+ },
+ {
+  "id": "safe-fumes",
+  "group": "Safety is 5 (kinds of fault the prompt names)",
+  "text": "I can smell petrol inside the cabin after the injector job. My children were coughing.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "The car was or may be unsafe to drive, so it must be 5, whatever else is mentioned."
+ },
+ {
+  "id": "safe-accelerator",
+  "group": "Safety is 5 (kinds of fault the prompt names)",
+  "text": "The accelerator got stuck down twice this morning. You only serviced it yesterday.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "The car was or may be unsafe to drive, so it must be 5, whatever else is mentioned."
+ },
+ {
+  "id": "safe-wires",
+  "group": "Safety is 5 (kinds of fault the prompt names)",
+  "text": "You left bare wires sparking under the dashboard. The replacement cost me 80,000 naira.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "The car was or may be unsafe to drive, so it must be 5, whatever else is mentioned."
+ },
+ {
+  "id": "safe-wipers",
+  "group": "Safety is 5 (kinds of fault the prompt names)",
+  "text": "Nice people. The wipers stopped in heavy rain on the highway an hour after you fitted them, I could not see.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "The car was or may be unsafe to drive, so it must be 5, whatever else is mentioned."
+ },
+ {
+  "id": "unseen-door",
+  "group": "Safety is 5 (faults the prompt does not name)",
+  "text": "The driver door swung open by itself at a roundabout. You had the door panel off last week.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "Dangerous, but not on the prompt's list, so the model must judge it."
+ },
+ {
+  "id": "unseen-gear",
+  "group": "Safety is 5 (faults the prompt does not name)",
+  "text": "It jumped out of gear going uphill and rolled back towards the car behind. You rebuilt that gearbox.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "Dangerous, but not on the prompt's list, so the model must judge it."
+ },
+ {
+  "id": "unseen-park",
+  "group": "Safety is 5 (faults the prompt does not name)",
+  "text": "I left it in Park outside my shop and it rolled into the road. This started after your service.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "Dangerous, but not on the prompt's list, so the model must judge it."
+ },
+ {
+  "id": "unseen-exhaust",
+  "group": "Safety is 5 (faults the prompt does not name)",
+  "text": "Exhaust smell fills the car with the windows shut since the repair. I get dizzy on long drives.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "Dangerous, but not on the prompt's list, so the model must judge it."
+ },
+ {
+  "id": "unseen-mirror",
+  "group": "Safety is 5 (faults the prompt does not name)",
+  "text": "The wing mirror you glued on dropped off on the expressway and hit a motorcycle.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "Dangerous, but not on the prompt's list, so the model must judge it."
+ },
+ {
+  "id": "unseen-battery",
+  "group": "Safety is 5 (faults the prompt does not name)",
+  "text": "The battery you sold me burst when I opened the bonnet and acid splashed my arm.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "Dangerous, but not on the prompt's list, so the model must judge it."
+ },
+ {
+  "id": "unseen-seat",
+  "group": "Safety is 5 (faults the prompt does not name)",
+  "text": "The front seat slides back on its own when I accelerate. One bolt was never put back after the carpet work.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "Dangerous, but not on the prompt's list, so the model must judge it."
+ },
+ {
+  "id": "unseen-glass",
+  "group": "Safety is 5 (faults the prompt does not name)",
+  "text": "Good price, thanks. The new windscreen moves when I push it though, the glue did not hold.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   5
+  ],
+  "why": "Dangerous, but not on the prompt's list, so the model must judge it."
+ },
+ {
+  "id": "not-safety-radio",
+  "group": "Not a safety danger",
+  "text": "The radio stopped working after your electrical repair and I have to come back again.",
+  "ok": [
+   "private_queue"
+  ],
+  "sev": [
+   1,
+   2,
+   3
+  ],
+  "why": "Guards against scoring every fault as a safety danger."
+ },
+ {
+  "id": "not-safety-scratch",
+  "group": "Not a safety danger",
+  "text": "There is a deep scratch on my rear door that was not there before. You must repaint it.",
+  "ok": [
+   "escalated",
+   "private_queue"
+  ],
+  "sev": [
+   3,
+   4
+  ],
+  "why": "Guards against scoring every fault as a safety danger."
+ },
+ {
+  "id": "not-safety-overcharge",
+  "group": "Not a safety danger",
+  "text": "You billed me 150,000 naira for a battery you never fitted.",
+  "ok": [
+   "escalated"
+  ],
+  "sev": [
+   4
+  ],
+  "why": "Guards against scoring every fault as a safety danger."
+ },
+ {
+  "id": "not-safety-late",
+  "group": "Not a safety danger",
+  "text": "The brake pads were fitted properly, but I waited three hours for a one hour job.",
+  "ok": [
+   "private_queue"
+  ],
+  "sev": [
+   1,
+   2,
+   3
+  ],
+  "why": "Guards against scoring every fault as a safety danger."
+ },
+ {
+  "id": "not-safety-fixed",
+  "group": "Not a safety danger",
+  "text": "You fixed the airbag light and the brakes feel safe again. Thank you.",
+  "ok": [
+   "ready_to_post"
+  ],
+  "sev": [
+   0
+  ],
+  "why": "Guards against scoring every fault as a safety danger."
+ },
+ {
+  "id": "not-safety-clean",
+  "group": "Not a safety danger",
+  "text": "The seats were left with greasy fingerprints and nobody apologised.",
+  "ok": [
+   "private_queue"
+  ],
+  "sev": [
+   1,
+   2,
+   3
+  ],
+  "why": "Guards against scoring every fault as a safety danger."
+ },
+ {
+  "id": "not-safety-nostart",
+  "group": "Not a safety danger",
+  "text": "The car will not start at all since your service and I had to take a taxi to work.",
+  "ok": [
+   "escalated",
+   "private_queue"
+  ],
+  "sev": [
+   2,
+   3,
+   4
+  ],
+  "why": "Guards against scoring every fault as a safety danger."
+ },
+ {
+  "id": "not-safety-ac",
+  "group": "Not a safety danger",
+  "text": "The air conditioning you repaired stopped cooling again after two days.",
+  "ok": [
+   "private_queue"
+  ],
+  "sev": [
+   2,
+   3
+  ],
+  "why": "Guards against scoring every fault as a safety danger."
+ },
+ {
+  "id": "not-safety-steering",
+  "group": "Not a safety danger",
+  "text": "The steering used to pull badly and the headlights kept going out. Both perfect since Tuesday. Thanks, team.",
+  "ok": [
+   "ready_to_post"
+  ],
+  "sev": [
+   0,
+   1
+  ],
+  "why": "A danger the garage fixed is praise, not a danger."
+ },
+ {
+  "id": "not-safety-towed",
+  "group": "Not a safety danger",
+  "text": "I arrived on a tow truck with no brakes at all and drove home happy. Excellent mechanics.",
+  "ok": [
+   "ready_to_post"
+  ],
+  "sev": [
+   0,
+   1
+  ],
+  "why": "A danger the garage fixed is praise, not a danger."
  }
 ]

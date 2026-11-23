@@ -110,6 +110,18 @@ were 4 (before, only 7 of the 20 replies scored 5). Nothing serious scored below
 4, and the hard-case safety replies, are still one point from the line. The 50,000 naira
 overcharge still moves between 3 and 4; both routes are acceptable for it.
 
+**Safety now scores 5 (23 Nov 2026).** Calmly worded dangers still scored a steady 4, even kinds the
+prompt names, so 02 now has a separate *Safety check* call and *Decide route* raises severity to 5
+on a yes. Library severity went from 54/60 to 60/60 with routes and history unchanged (320/320).
+Asking the safety question inside *Score reply* was tried twice and rejected: it pulled mild
+complaints to polarity 0, and only 13, then 19, of 20 repeat complaints escalated.
+Hard cases: 55/58. Still wrong: a loose windscreen mentioned after praise (needs_review, not 5),
+praise for brakes that were fixed (a false alarm), and a car that will not start (5, from *Score
+reply*). The "three days to change the oil" sarcasm reached ready_to_post in 3 of 20 repeats.
+The safety prompt was tuned while looking at some of these cases, so they are not all unseen.
+Live 02 stores the *Score reply* prompt as one line; this copy matches it. The result files
+between 20:55 and 22:02 on 23 Nov measured versions that were not adopted.
+
 ### 5. Mild complaints are one step above the review floor (Layer 2)
 
 Every mild complaint scored confidence **0.7**; the floor that sends a reply to a human is
