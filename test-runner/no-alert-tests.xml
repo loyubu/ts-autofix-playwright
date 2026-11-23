@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <!DOCTYPE suite SYSTEM "https://testng.org/testng-1.0.dtd">
 
-<!-- Positive, first complaint and unreadable reply: the three scenarios that do not send a
-     Slack alert or manager email. Good for a quick check. -->
+<!-- Positive, first complaint and unreadable reply, plus the public reviews page: the tests
+     that do not send a Slack alert or manager email. Good for a quick check. -->
 <suite name="TS Autofix - no alerts" parallel="none">
     <test name="Feedback routing without escalations">
         <groups>
@@ -12,6 +12,7 @@
         </groups>
         <classes>
             <class name="testcases.FeedbackRoutingTests"/>
+            <class name="testcases.ReviewsPageTests"/>
         </classes>
     </test>
 </suite>

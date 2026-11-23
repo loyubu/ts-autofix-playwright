@@ -19,7 +19,8 @@ break it.
 
 ## What it covers
 
-Five standalone tests, one per routing scenario. Each one creates its own customer and runs the
+Five standalone tests, one per routing scenario, and a smoke test of the public reviews page.
+Each routing test creates its own customer and runs the
 full journey:
 
 1. **Check in** a car on the home page, and assert the job sheet shows what was entered.
@@ -45,6 +46,13 @@ tests the AI scorer with different wording. Customers are generated with
 
 The unreadable-reply test also checks a real bug that was fixed: the scorer used to judge the
 fault described at check-in instead of the customer's reply.
+
+`reviewsPageLoadsAndShowsNothingPrivate` opens the public `/reviews` page and only looks: it loads,
+shows reviews or the "will appear here" line, every review is signed with a first name and
+initial, a branch and a month, and nothing sent to the browser holds an email address or a job
+code. It creates no records and sends no alerts. When nothing is published, only the page itself
+is checked. It cannot tell whether a customer gave permission; the website's own tests cover that
+rule.
 
 ### What the tests do not do
 
@@ -88,10 +96,12 @@ src/main/java/pageobjects/   one class per page, with chainable methods
   FeedbackFormPage           the n8n "How did we do?" form
   ManagerLoginPage           /manager    passcode sign-in
   ManagerDashboardPage       /manager    the four queues, rows, reasons and actions
+  ReviewsPage                /reviews    the public reviews
   Queue                      the four queues by their headings
 src/test/java/testcases/
   BaseTest                   a fresh browser per test, traces on failure, the shared journey
   FeedbackRoutingTests       the five scenarios
+  ReviewsPageTests           the public reviews page
 src/test/java/utils/
   Constants                  settings from environment variables or -D properties
   CustomerData               Faker (en-NG) customers and cars
@@ -116,7 +126,7 @@ visit appears, for up to 3 minutes by default.
 You need JDK 17 and Maven. Playwright downloads Chromium the first time it runs.
 
 ```bash
-# all five scenarios
+# all five scenarios and the reviews page
 mvn test -Dmanager.passcode=... -Dfeedback.form.url=https://<your-n8n>/form/feedback
 
 # a single suite
