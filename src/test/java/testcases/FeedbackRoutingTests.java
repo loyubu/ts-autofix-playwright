@@ -24,7 +24,8 @@ public class FeedbackRoutingTests extends BaseTest {
         String reply = ReplyLibrary.randomFrom(ReplyLibrary.POSITIVE);
 
         String visitId = checkInAndCloseJob(customer, ReplyLibrary.randomFrom(ReplyLibrary.CHECK_IN_ISSUES));
-        submitFeedback(visitId, reply);
+        // The only test that chooses stars. The others leave the rating blank, which is allowed.
+        submitFeedback(visitId, reply, "4 - Good");
 
         ManagerDashboardPage dashboard = signInAsManager();
         assertRoutedTo(dashboard, visitId, Queue.READY_TO_POST);
@@ -35,6 +36,8 @@ public class FeedbackRoutingTests extends BaseTest {
         // The weekly run therefore never puts anything on the public reviews page.
         dashboard.openVisit(Queue.READY_TO_POST, visitId);
         assertThat(dashboard.customerWords(Queue.READY_TO_POST)).hasText(reply);
+        assertThat(dashboard.stars(Queue.READY_TO_POST)).hasCount(1);
+        assertThat(dashboard.stars(Queue.READY_TO_POST)).hasAttribute("aria-label", "4 out of 5 stars");
         assertThat(dashboard.publishingPermission()).containsText("No");
         assertThat(dashboard.actionButton("Publish on website")).hasCount(0);
         dashboard.clickAction("Close without publishing");
@@ -58,6 +61,8 @@ public class FeedbackRoutingTests extends BaseTest {
 
         dashboard.openVisit(Queue.PRIVATE_DRAFTS, visitId);
         assertThat(dashboard.customerWords(Queue.PRIVATE_DRAFTS)).hasText(reply);
+        // No rating was chosen, so no stars are shown.
+        assertThat(dashboard.stars(Queue.PRIVATE_DRAFTS)).hasCount(0);
         assertDraftedFor(dashboard, customer);
 
         // "Mark sent (own email)" records the reply without the site emailing anyone.
@@ -119,6 +124,7 @@ public class FeedbackRoutingTests extends BaseTest {
 
         dashboard.openVisit(Queue.NEEDS_REVIEW, visitId);
         assertThat(dashboard.customerWords(Queue.NEEDS_REVIEW)).hasText(reply);
+        assertThat(dashboard.stars(Queue.NEEDS_REVIEW)).hasCount(0);
         dashboard.clickAction("Mark resolved");
         assertLeftTheQueues(dashboard, Queue.NEEDS_REVIEW, visitId);
     }

@@ -100,12 +100,20 @@ public class BaseTest {
         return jobCode;
     }
 
-    /** Replies on the n8n feedback form, as the customer would from the email link. */
+    /** Replies on the n8n feedback form, as the customer would from the email link, without stars. */
     protected void submitFeedback(String visitId, String reply) {
+        submitFeedback(visitId, reply, null);
+    }
+
+    /** The same, choosing a star rating such as "4 - Good". Null leaves the rating blank. */
+    protected void submitFeedback(String visitId, String reply, String rating) {
         FeedbackFormPage form = new FeedbackFormPage(page)
                 .open(Constants.feedbackFormUrl(), visitId)
-                .enterFeedback(reply)
-                .submit();
+                .enterFeedback(reply);
+        if (rating != null) {
+            form.chooseRating(rating);
+        }
+        form.submit();
         assertThat(form.confirmationHeader()).isVisible();
         assertThat(form.confirmationHeader()).hasText(Constants.FORM_SUBMITTED_TEXT);
         System.out.println("Replied for " + visitId + ": \"" + reply + "\"");

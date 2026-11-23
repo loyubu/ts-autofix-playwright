@@ -124,6 +124,12 @@ public class ManagerDashboardPage extends BasePage {
         return queue(queue).locator("blockquote");
     }
 
+    /** The stars in a queue's open row. Shown only when the customer chose a rating. */
+    public Locator stars(Queue queue) {
+        return queue(queue).getByRole(AriaRole.IMG,
+                new Locator.GetByRoleOptions().setName(Pattern.compile("^[1-5] out of 5 stars$")));
+    }
+
     /** The drafted reply box of the open row (Escalated and Private drafts only). */
     public Locator draftReply() {
         return page.locator("textarea[id^='draft-']");

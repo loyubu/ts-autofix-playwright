@@ -27,6 +27,12 @@ public class FeedbackFormPage extends BasePage {
         return this;
     }
 
+    /** The optional star rating, by its label in the list, for example "4 - Good". */
+    public FeedbackFormPage chooseRating(String option) {
+        page.locator("#field-2").selectOption(option);
+        return this;
+    }
+
     public FeedbackFormPage submit() {
         page.locator("#submit-btn").click();
         return this;

@@ -34,11 +34,15 @@ full journey:
 
 | Test | Customer's reply | Expected queue | Manager action |
 |---|---|---|---|
-| `positiveFeedbackIsReadyToPost` | Pleased with the work (permission box unticked) | **Ready to post**, "Positive", "Customer allowed publishing: No", the customer's exact words | Close without publishing |
+| `positiveFeedbackIsReadyToPost` | Pleased with the work, 4 stars (permission box unticked) | **Ready to post**, "Positive", "Customer allowed publishing: No", "4 out of 5 stars", the customer's exact words | Close without publishing |
 | `firstComplaintGoesToPrivateDrafts` | A minor complaint, first time | **Private drafts**, severity below 4, the customer's exact words, and a draft addressed to them and signed for their branch | Mark sent (own email) |
 | `repeatComplaintIsEscalated` | Two visits by the same customer: a first complaint, then a deliberately mild one | **Escalated**, "Repeat complaint", severity below 4 (so history alone escalated it), the customer's exact words and their draft | Mark alert acted on |
 | `unreadableReplyNeedsReview` | Gibberish, after a long complaint at check-in | **Needs review**, "Reply unclear or not about the visit. Please read it." (so an AI failure cannot pass), the fixed summary and the customer's exact words | Mark resolved |
 | `seriousComplaintIsEscalated` | Damage, safety or money lost | **Escalated**, "Severity", severity 4 or 5, the customer's exact words and their draft | Mark alert acted on |
+
+The star rating is optional and never affects routing. The positive test chooses 4 and checks the
+manager page shows it; the other tests leave it blank, and the first-complaint and
+unreadable-reply tests check that no stars are shown.
 
 Each test picks its reply at random from a pool of **20** (see `ReplyLibrary`), so every run
 tests the AI scorer with different wording. Customers are generated with
